@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MathRush - جدول الضرب</title>
+  <style>
+    :root {
+      --bg: #0a1428;
+      --card-bg: #1e2937;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --border: #334155;
+      --accent: #60a5fa;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+    }
+
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-primary: #1e2937;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+      --accent: #2563eb;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      transition: all 0.4s ease;
+    }
+
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; height: 60px;
+      background: #1e2937; border-bottom: 1px solid #334155;
+      display: flex; align-items: center; padding: 0 16px; z-index: 1000;
+    }
+    .nav-title {
+      font-size: 20px; 
+      font-weight: 700; 
+      flex: 1; 
+      text-align: center; 
+      color: #60a5fa;
+    }
+    .theme-toggle {
+      width: 44px; height: 44px; border-radius: 50%; background: #334155;
+      color: #60a5fa; border: none; font-size: 22px; cursor: pointer;
+    }
+
+    .wrap { max-width: 520px; margin: 0 auto; padding: 20px 16px; padding-top: 80px; }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .title { font-size: 26px; font-weight: 700; text-align: center; margin-bottom: 8px; }
+    .sub { font-size: 15px; color: var(--text-secondary); text-align: center; margin-bottom: 24px; }
+
+    .card, .q-card, .res-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .lbl { font-size: 14px; color: var(--text-secondary); min-width: 80px; }
+    .field {
+      flex: 1; padding: 12px 14px; font-size: 16px;
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+      background: #0f172a; color: var(--text-primary);
+    }
+
+    .btn {
+      width: 100%; padding: 14px; font-size: 16px; font-weight: 600;
+      border: none; border-radius: var(--radius-lg); cursor: pointer;
+      margin-bottom: 10px;
+    }
+    .btn-blue { background: var(--accent); color: white; }
+    .btn { background: var(--card-bg); color: var(--text-primary); border: 1px solid var(--border); }
+
+    .av-opt {
+      width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+      border: 2px solid transparent;
+    }
+    .av-opt.sel { border: 2px solid #60a5fa; }
+
+    .level-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .lc {
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 16px; cursor: pointer;
+    }
+    .lc.sel { border: 2px solid var(--accent); background: rgba(96,165,250,0.15); }
+
+    .custom-box { 
+      background: #0f172a; padding: 16px; border-radius: 12px; 
+      margin-top: 10px; display: none; 
+    }
+    .custom-box.show { display: block; }
+
+    .q-text {
+      font-size: 42px;
+      font-weight: 700;
+      margin: 30px 0;
+      direction: ltr;
+    }
+    .q-input {
+      font-size: 28px; text-align: center; width: 160px;
+      padding: 12px; border: 2px solid var(--border);
+      border-radius: var(--radius-md); background: #0f172a; color: white;
+    }
+    .fb { margin-top: 16px; font-size: 18px; font-weight: 600; min-height: 30px; }
+
+    .lb-item {
+      display: flex; align-items: center; gap: 12px; padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .lb-item:last-child { border-bottom: none; }
+    .you-badge {
+      background: #60a5fa; color: #0a1428; font-size: 11px;
+      padding: 2px 8px; border-radius: 10px; margin-right: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <div class="nav-title">MathRush</div>
+    <button class="theme-toggle" id="theme-toggle">☀️</button>
+  </div>
+
+  <div class="wrap">
+
+    <div id="s-login" class="screen active">
+      <div class="title">جدول الضرب</div>
+      <div class="sub">سجّل دخولك للمنافسة في لوحة المتصدرين</div>
+      <div class="card">
+        <div class="row">
+          <span class="lbl">اسمك</span>
+          <input class="field" id="inp-name" type="text" placeholder="اكتب اسمك هنا" maxlength="20">
+        </div>
+        <div class="row">
+          <span class="lbl">اللون</span>
+          <div style="display:flex;gap:10px;flex:1">
+            <div class="av-opt sel" data-color="blue" onclick="pickColor('blue',this)" style="background:#60a5fa"></div>
+            <div class="av-opt" data-color="teal" onclick="pickColor('teal',this)" style="background:#34d399"></div>
+            <div class="av-opt" data-color="coral" onclick="pickColor('coral',this)" style="background:#f87171"></div>
+            <div class="av-opt" data-color="amber" onclick="pickColor('amber',this)" style="background:#fbbf24"></div>
+            <div class="av-opt" data-color="purple" onclick="pickColor('purple',this)" style="background:#a78bfa"></div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-blue" onclick="doLogin()">دخول</button>
+      <button class="btn" onclick="showLB()">عرض لوحة المتصدرين</button>
+    </div>
+
+    <div id="s-home" class="screen">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div id="hd-avatar" style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;background:#60a5fa;color:#0f172a"></div>
+          <span id="hd-name" style="font-size:18px;font-weight:600"></span>
+        </div>
+        <button onclick="showLB()" class="btn" style="padding:8px 16px;font-size:14px">المتصدرون</button>
+      </div>
+
+      <div class="title" style="text-align:right;font-size:21px">اختر مستوى الصعوبة</div>
+      <div class="level-grid">
+        <div class="lc sel" data-level="easy" onclick="selLevel('easy',this)"><div class="lc-name">سهل</div><div class="lc-desc">1-5 — 5 أسئلة</div></div>
+        <div class="lc" data-level="medium" onclick="selLevel('medium',this)"><div class="lc-name">متوسط</div><div class="lc-desc">1-10 — 8 أسئلة</div></div>
+        <div class="lc" data-level="hard" onclick="selLevel('hard',this)"><div class="lc-name">صعب</div><div class="lc-desc">1-12 — 10 أسئلة</div></div>
+        <div class="lc" data-level="custom" onclick="selLevel('custom',this)"><div class="lc-name">مخصص</div><div class="lc-desc">اختر الجدول وعدد الأسئلة</div></div>
+      </div>
+
+      <div class="custom-box" id="custom-box">
+        <div class="row">
+          <span class="lbl">جدول</span>
+          <input type="number" id="c-table" class="field" value="5" min="2" max="12" style="width:80px">
+        </div>
+        <div class="row">
+          <span class="lbl">عدد الأسئلة</span>
+          <input type="number" id="c-q" class="field" value="10" min="5" max="50" style="width:80px">
+        </div>
+      </div>
+
+      <button class="btn btn-blue" onclick="startGame()">ابدأ اللعبة</button>
+    </div>
+
+    <div id="s-game" class="screen">
+      <button onclick="goHome()" style="background:none;border:none;color:var(--text-secondary);margin-bottom:12px">← رجوع</button>
+      <div class="q-card">
+        <div class="q-text" id="g-q-text">؟ = ٤ × ٢</div>
+        <input type="number" class="q-input" id="g-input" placeholder="الجواب" onkeydown="if(event.key==='Enter') checkAns()">
+        <div id="g-fb" class="fb"></div>
+      </div>
+      <button class="btn btn-blue" onclick="checkAns()">تحقق</button>
+      <button class="btn" onclick="skipQ()">تخطى</button>
+    </div>
+
+    <div id="s-result" class="screen">
+      <div class="title">انتهت اللعبة</div>
+      <div class="res-card">
+        <div style="font-size:52px; font-weight:700; color:var(--accent)" id="r-score">0</div>
+        <div style="color:var(--text-secondary)">نقطة</div>
+        <div id="r-msg" style="margin-top:12px;font-size:17px"></div>
+      </div>
+      <button class="btn btn-blue" onclick="replayGame()">العب مرة أخرى</button>
+      <button class="btn" onclick="goHome()">الرئيسية</button>
+      <button class="btn" onclick="showLB()">لوحة المتصدرين</button>
+    </div>
+
+    <div id="s-lb" class="screen">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div class="title" style="margin:0">المتصدرون</div>
+        <button onclick="goHome()" style="background:none;border:none;color:var(--text-secondary)">← رجوع</button>
+      </div>
+      <div id="lb-list" class="card"></div>
+    </div>
+  </div>
+
+<script>
+const html = document.documentElement;
+const toggleBtn = document.getElementById('theme-toggle');
+
+function setTheme(theme) {
+  html.setAttribute('data-theme', theme);
+  try { localStorage.setItem('theme', theme); } catch(e){}
+  toggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+toggleBtn.addEventListener('click', () => {
+  const cur = html.getAttribute('data-theme') || 'dark';
+  setTheme(cur === 'dark' ? 'light' : 'dark');
+});
+setTheme('dark');
+
+let user = null;
+let selColor = 'blue';
+let gs = {};
+
+const COLORS = { 
+  blue: '#60a5fa', 
+  teal: '#34d399', 
+  coral: '#f87171', 
+  amber: '#fbbf24', 
+  purple: '#a78bfa' 
+};
+
+function pickColor(c, el) {
+  selColor = c;
+  document.querySelectorAll('.av-opt').forEach(x => x.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function doLogin() {
+  const name = document.getElementById('inp-name').value.trim();
+  if (!name) return alert("الرجاء كتابة اسمك");
+  user = { name, color: selColor };
+  document.getElementById('hd-name').textContent = name;
+  document.getElementById('hd-avatar').style.backgroundColor = COLORS[selColor];
+  show('s-home');
+}
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function selLevel(level, el) {
+  document.querySelectorAll('.lc').forEach(l => l.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('custom-box').classList.toggle('show', level === 'custom');
+}
+
+function generateQuestion(table) {
+  const b = Math.floor(Math.random() * 11) + 2;
+  const ans = table * b;
+  return { table, b, ans, text: `؟ = ${b} × ${table}` };
+}
+
+function startGame() {
+  if (!user) return alert("يرجى تسجيل الدخول أولاً");
+
+  const levelEl = document.querySelector('.lc.sel');
+  const level = levelEl.dataset.level;
+  let questions = [];
+  let qCount = 10;
+
+  if (level === 'custom') {
+    const table = parseInt(document.getElementById('c-table').value) || 5;
+    qCount = parseInt(document.getElementById('c-q').value) || 10;
+    for (let i = 0; i < qCount; i++) {
+      questions.push(generateQuestion(table));
+    }
+  } else {
+    const max = level === 'easy' ? 5 : level === 'medium' ? 10 : 12;
+    qCount = level === 'easy' ? 5 : level === 'medium' ? 8 : 10;
+    for (let i = 0; i < qCount; i++) {
+      const table = Math.floor(Math.random() * (max - 1)) + 2;
+      questions.push(generateQuestion(table));
+    }
+  }
+
+  gs = { score: 0, correct: 0, total: qCount, questions, current: 0, level };
+  show('s-game');
+  loadQuestion();
+}
+
+function loadQuestion() {
+  const q = gs.questions[gs.current];
+  document.getElementById('g-q-text').textContent = q.text;
+  document.getElementById('g-input').value = '';
+  document.getElementById('g-fb').textContent = '';
+}
+
+function checkAns() {
+  const input = parseInt(document.getElementById('g-input').value.trim());
+  const fb = document.getElementById('g-fb');
+  const q = gs.questions[gs.current];
+
+  if (!input) return;
+
+  if (input === q.ans) {
+    gs.correct++;
+    gs.score += 10;
+    fb.innerHTML = '✅ إجابة صحيحة!';
+    fb.style.color = '#34d399';
+  } else {
+    fb.innerHTML = `❌ الجواب: ${q.ans}`;
+    fb.style.color = '#f87171';
+  }
+
+  setTimeout(nextQuestion, 900);
+}
+
+function skipQ() {
+  document.getElementById('g-fb').innerHTML = 'تم التخطي';
+  setTimeout(nextQuestion, 600);
+}
+
+function nextQuestion() {
+  gs.current++;
+  if (gs.current >= gs.questions.length) {
+    finishGame();
+  } else {
+    loadQuestion();
+  }
+}
+
+function finishGame() {
+  saveToLeaderboard();
+  document.getElementById('r-score').textContent = gs.score;
+  document.getElementById('r-msg').innerHTML = `صحيح: ${gs.correct} من ${gs.total}`;
+  show('s-result');
+}
+
+function saveToLeaderboard() {
+  const entry = {
+    name: user.name,
+    color: user.color,
+    score: gs.score,
+    correct: gs.correct,
+    total: gs.total,
+    level: gs.level,
+    date: new Date().toLocaleDateString('ar-SA')
+  };
+
+  let lb = [];
+  try {
+    const saved = localStorage.getItem('mathrush_lb');
+    if (saved) lb = JSON.parse(saved);
+  } catch(e) {}
+
+  lb.push(entry);
+  lb.sort((a, b) => b.score - a.score);
+  if (lb.length > 50) lb = lb.slice(0, 50);
+
+  try {
+    localStorage.setItem('mathrush_lb', JSON.stringify(lb));
+  } catch(e) {}
+}
+
+function showLB() {
+  show('s-lb');
+  const list = document.getElementById('lb-list');
+  list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-secondary)">جارٍ التحميل...</div>';
+
+  let lb = [];
+  try {
+    const saved = localStorage.getItem('mathrush_lb');
+    if (saved) lb = JSON.parse(saved);
+  } catch(e) {}
+
+  if (lb.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-secondary)">لا توجد نتائج بعد.<br>ابدأ اللعبة وسجّل نتيجتك!</div>';
+    return;
+  }
+
+  let html = '';
+  lb.forEach((e, i) => {
+    const isYou = user && e.name === user.name;
+    html += `
+      <div class="lb-item">
+        <div style="width:28px;text-align:center;font-weight:600;color:var(--accent)">${i+1}</div>
+        <div style="width:36px;height:36px;border-radius:50%;background:${COLORS[e.color]||'#60a5fa'};color:#0a1428;display:flex;align-items:center;justify-content:center;font-weight:700">${e.name[0]}</div>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center">
+            <span style="font-weight:600">${e.name}</span>
+            ${isYou ? '<span class="you-badge">أنت</span>' : ''}
+          </div>
+          <div style="font-size:13px;color:var(--text-secondary)">${e.level} — ${e.correct}/${e.total} — ${e.date}</div>
+        </div>
+        <div style="font-size:20px;font-weight:700;color:var(--accent)">${e.score}</div>
+      </div>`;
+  });
+  list.innerHTML = html;
+}
+
+function replayGame() { startGame(); }
+function goHome() { show('s-home'); }
+
+window.pickColor = pickColor;
+window.doLogin = doLogin;
+window.selLevel = selLevel;
+window.startGame = startGame;
+window.checkAns = checkAns;
+window.skipQ = skipQ;
+window.replayGame = replayGame;
+window.goHome = goHome;
+window.showLB = showLB;
+</script>
+</body>
+</html>
